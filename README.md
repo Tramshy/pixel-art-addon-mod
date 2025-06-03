@@ -18,3 +18,6 @@ You can find the original code [here](https://lucasroedel.gumroad.com/l/pixel_ar
 
 ## License
 This add-on is licensed under the GNU GPLv3 License. For more information read: `LICENSE`.
+
+## Additional Notes
+In order to get reflections to work with this add-on, you will need to use Light Probe Planes. Based on testing in version 4.1, no other methods will really work to get proper reflections working for objects with a pixel material.
