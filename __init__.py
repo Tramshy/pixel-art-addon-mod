@@ -32,6 +32,7 @@ bl_info = {
 import bpy
 from bpy.utils import register_class, unregister_class
 from . import pixel_art_addon
+from .append_shine_node_group import append_from_asset
 
 ########## Set Render Settings ##########
 def render_settings(context):
@@ -76,6 +77,16 @@ class PIXEL_ART_OT_single_material(bpy.types.Operator):
         pixel_art_addon.single_material(context)
         return {'FINISHED'}
 
+class PIXEL_ART_OT_single_material_shine(bpy.types.Operator):
+    """Creates default pixel art material and a stylized shine effect. If material with name 'PixelArt_Simple' already exists, resets it to default and adds shine"""
+    bl_idname = "render.single_material_shine"
+    bl_label = "Create/Add Material (Shine)"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        pixel_art_addon.single_material_shine(self, context)
+        return {'FINISHED'}
+
 class PIXEL_ART_OT_multiple_material(bpy.types.Operator):
     """Creates pixel art material with multiple lights setup. If material with name 'PixelArt_MultipleLights' already exists, resets it to default"""
     bl_idname = "render.multiple_material"
@@ -84,6 +95,16 @@ class PIXEL_ART_OT_multiple_material(bpy.types.Operator):
 
     def execute(self, context):
         pixel_art_addon.multiple_material(context)
+        return {'FINISHED'}
+
+class PIXEL_ART_OT_multiple_material_shine(bpy.types.Operator):
+    """Creates pixel art material with multiple lights setup and a stylized shine effect. If material with name 'PixelArt_MultipleLights' already exists, resets it to default and adds shine"""
+    bl_idname = "render.multiple_material_shine"
+    bl_label = "Create/Add Shine)"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        pixel_art_addon.multiple_material_shine(self, context)
         return {'FINISHED'}
 
 class PIXEL_ART_OT_lights_setup(bpy.types.Operator):
@@ -128,6 +149,9 @@ class PIXEL_RENDER_PT_pixel_render_panel(bpy.types.Panel):
         row.scale_y = 1.5
         row.operator("render.single_material")
         row = box.row()
+        row.scale_y = 1.5
+        row.operator("render.single_material_shine")
+        row = box.row()
         row = layout.row()
         
         box = layout.box()
@@ -139,13 +163,18 @@ class PIXEL_RENDER_PT_pixel_render_panel(bpy.types.Panel):
         row.scale_y = 1.5
         row.operator("render.multiple_material")
         row = box.row()
+        row.scale_y = 1.5
+        row.operator("render.multiple_material_shine")
+        row = box.row()
         row.scale_y = 1
         row.operator("render.lights_setup")   
 
 classes = [
     PIXEL_ART_OT_render_settings,
     PIXEL_ART_OT_single_material,
+    PIXEL_ART_OT_single_material_shine,
     PIXEL_ART_OT_multiple_material,
+    PIXEL_ART_OT_multiple_material_shine,
     PIXEL_ART_OT_lights_setup,
     PIXEL_RENDER_PT_pixel_render_panel
 ]
@@ -154,21 +183,12 @@ def register():
     for cls in classes:
         register_class(cls)
 
-    # bpy.utils.register_class(PIXEL_ART_OT_render_settings)
-    # bpy.utils.register_class(PIXEL_ART_OT_single_material)
-    # bpy.utils.register_class(PIXEL_ART_OT_multiple_material)
-    # bpy.utils.register_class(PIXEL_ART_OT_lights_setup)
-    # bpy.utils.register_class(PIXEL_RENDER_PT_pixel_render_panel)
+    # Wait to let main Blender thread load node_groups in bpy.data.
+    bpy.app.timers.register(append_from_asset)
 
 def unregister():
     for cls in classes:
         unregister_class(cls)
-
-    # bpy.utils.unregister_class(PIXEL_ART_OT_render_settings)
-    # bpy.utils.unregister_class(PIXEL_ART_OT_single_material)
-    # bpy.utils.unregister_class(PIXEL_ART_OT_multiple_material)
-    # bpy.utils.unregister_class(PIXEL_ART_OT_lights_setup)
-    # bpy.utils.unregister_class(PIXEL_RENDER_PT_pixel_render_panel)
 
 if __name__ == "__main__":
     register()

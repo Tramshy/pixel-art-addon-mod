@@ -151,6 +151,63 @@ def single_material(context):
     var2.targets[0].data_path = "render.resolution_y"
     resolutionYdriver.driver.expression = "resolutionY / 2"
 
+def single_material_shine(self, context):
+    single_material(context)
+
+    mat = None
+
+    for material in bpy.data.materials:
+        if material.name == "PixelArt_Simple":
+            mat = material
+
+    if mat is None:
+        self.report({'ERROR'}, "No PixelArt material found. This should not be possible... good luck")
+        return
+    
+    nodes = mat.node_tree.nodes
+    # Get pre-existing nodes
+    material_output = nodes.get("Material Output")
+    emission = nodes.get("Emission")
+    color_ramp = nodes.get("Color Ramp")
+
+    # Disconnect color ramp and emission nodes
+    link = color_ramp.outputs[0].links[0]
+    color_ramp.id_data.links.remove(link)
+
+    # Move material output and emission nodes
+    material_output.location = (585, 305)
+    emission.location = (390, 285)
+
+    # Create new nodes
+    shine_group = nodes.new(type="ShaderNodeGroup")
+    shine_group.node_tree = bpy.data.node_groups["Shine Reflection"]
+    shine_group.location = (-105, 30)
+
+    # Value nodes for rotation and scale of shine group
+    value_rot = nodes.new(type="ShaderNodeValue")
+    value_rot.location = (-315, -100)
+    value_rot.label = "Shine Rotation"
+    value_rot.outputs[0].default_value = 2.5
+
+    value_scale = nodes.new(type="ShaderNodeValue")
+    value_scale.location = (-315, -190)
+    value_scale.label = "Shine Scale"
+    value_scale.outputs[0].default_value = 1
+
+    # Create color mixing node and set correct settings before use
+    mix_node = nodes.new(type="ShaderNodeMixRGB")
+    mix_node.location = (155, 200)
+    mix_node.blend_type = 'ADD'
+
+    # Connect nodes
+    links = mat.node_tree.links
+
+    links.new(value_rot.outputs[0], shine_group.inputs['Rotation'])
+    links.new(value_scale.outputs[0], shine_group.inputs['Scale'])
+    links.new(shine_group.outputs[0], mix_node.inputs['Color2'])
+    links.new(color_ramp.outputs['Color'], mix_node.inputs['Color1'])
+    links.new(mix_node.outputs[0], emission.inputs['Color'])
+
 ########## Creates Multiple Lights Default Material ##########
 def multiple_material(context):
     
@@ -387,6 +444,64 @@ def multiple_material(context):
     bsdfNode = material.node_tree.nodes.new(type = "ShaderNodeBsdfPrincipled")
     bsdfNode.location = (-2500, 0)
     material.node_tree.links.new(bsdfNode.outputs[0], shaderToRgbNode.inputs[0])
+
+def multiple_material_shine(self, context):
+    multiple_material(context)
+
+    mat = None
+
+    for material in bpy.data.materials:
+        if material.name == "PixelArt_MultipleLights":
+            mat = material
+
+    if mat is None:
+        self.report({'ERROR'}, "No PixelArt material found. This should not be possible... good luck")
+        return
+    
+    nodes = mat.node_tree.nodes
+    # Get pre-existing nodes
+    material_output = nodes.get("Material Output")
+    emission = nodes.get("Emission")
+    # Could either be Mix (Legacy) or Mix (Legacy).003
+    legacy_mix = nodes.get("Mix (Legacy)")
+
+    # Disconnect mix legacy (lighten) and emission nodes
+    link = legacy_mix.outputs[0].links[0]
+    legacy_mix.id_data.links.remove(link)
+
+    # Move material output and emission nodes
+    material_output.location = (600, 300)
+    emission.location = (400, 300)
+
+    # Create new nodes
+    shine_group = nodes.new(type="ShaderNodeGroup")
+    shine_group.node_tree = bpy.data.node_groups["Shine Reflection"]
+    shine_group.location = (-45, 95)
+
+    # Value nodes for rotation and scale of shine group
+    value_rot = nodes.new(type="ShaderNodeValue")
+    value_rot.location = (-235, -35)
+    value_rot.label = "Shine Rotation"
+    value_rot.outputs[0].default_value = 2.5
+
+    value_scale = nodes.new(type="ShaderNodeValue")
+    value_scale.location = (-235, -125)
+    value_scale.label = "Shine Scale"
+    value_scale.outputs[0].default_value = 1
+
+    # Create color mixing node and set correct settings before use
+    mix_node = nodes.new(type="ShaderNodeMixRGB")
+    mix_node.location = (165, 265)
+    mix_node.blend_type = 'ADD'
+
+    # Connect nodes
+    links = mat.node_tree.links
+
+    links.new(value_rot.outputs[0], shine_group.inputs['Rotation'])
+    links.new(value_scale.outputs[0], shine_group.inputs['Scale'])
+    links.new(shine_group.outputs[0], mix_node.inputs['Color2'])
+    links.new(legacy_mix.outputs['Color'], mix_node.inputs['Color1'])
+    links.new(mix_node.outputs[0], emission.inputs['Color'])
 
 ########## Creates Tri Lights Setup ##########
 def lights_setup(context):
