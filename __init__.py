@@ -38,7 +38,11 @@ from .append_shine_node_group import append_from_asset
 def render_settings(context):
     scene = bpy.context.scene
 
-    scene.render.engine = 'BLENDER_EEVEE'
+    try:
+        scene.render.engine = 'BLENDER_EEVEE'
+    except:
+        scene.render.engine = 'BLENDER_EEVEE_NEXT'
+
     scene.eevee.taa_render_samples = 1
     scene.eevee.taa_samples = 1
     scene.eevee.use_taa_reprojection = False
