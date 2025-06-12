@@ -39,9 +39,9 @@ def render_settings(context):
     scene = bpy.context.scene
 
     try:
-        scene.render.engine = 'BLENDER_EEVEE'
-    except:
         scene.render.engine = 'BLENDER_EEVEE_NEXT'
+    except:
+        scene.render.engine = 'BLENDER_EEVEE'
 
     scene.eevee.taa_render_samples = 1
     scene.eevee.taa_samples = 1
