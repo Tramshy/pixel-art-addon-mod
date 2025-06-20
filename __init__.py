@@ -52,6 +52,8 @@ def render_settings(context):
     scene.render.line_thickness = 0.1
     scene.display_settings.display_device = 'sRGB'
     scene.view_settings.view_transform = 'Standard'
+    scene.render.image_settings.file_format = 'PNG'
+    scene.render.image_settings.color_depth = '16'
     scene.render.film_transparent = True
     scene.render.image_settings.compression = 100
 
