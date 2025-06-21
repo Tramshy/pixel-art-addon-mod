@@ -571,9 +571,7 @@ def create_emitter():
 
     return pss
 
-def create_smoke():
-    emitter = create_emitter()
-
+def create_particle():
     mat = None
 
     for material in bpy.data.materials:
@@ -608,4 +606,9 @@ def create_smoke():
     bpy.ops.object.material_slot_add()
     particle.material_slots[0].material = mat
 
-    emitter.instance_object = particle
+    return particle
+
+def create_smoke():
+    emitter = create_emitter()
+
+    emitter.instance_object = create_particle()

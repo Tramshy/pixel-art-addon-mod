@@ -133,9 +133,19 @@ class new_smoke_particle_system(bpy.types.Operator):
         pixel_art_addon.create_smoke()
         return {'FINISHED'}
 
+class new_smoke_particle(bpy.types.Operator):
+    """Creates a new particle object, but not a new emitter. You will have to manually set the smoke particle to an emitter"""
+    bl_idname = "render.smoke_particle"
+    bl_label = "Create Particle"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        pixel_art_addon.create_particle()
+        return {'FINISHED'}
+
 class new_smoke_emitter(bpy.types.Operator):
     """Creates a new emitter, but not a new smoke particle. You will have to manually set the smoke particle to the emitter. This is useful if you only want to use one particle object instance"""
-    bl_idname = "render.smoke_particle"
+    bl_idname = "render.smoke_emitter"
     bl_label = "Create Emitter"
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -204,6 +214,10 @@ class PIXEL_RENDER_PT_pixel_render_panel(bpy.types.Panel):
         row.scale_y = 1.5
         row.operator("render.smoke_particle_dupli")
         row = box.row()
+        row = box.row()
+        row.scale_y = 1.5
+        row.operator("render.smoke_emitter")
+        row = box.row()
         row.scale_y = 1.5
         row.operator("render.smoke_particle")
         row = box.row()
@@ -218,6 +232,7 @@ classes = [
     PIXEL_ART_OT_lights_setup,
     PIXEL_RENDER_PT_pixel_render_panel,
     new_smoke_particle_system,
+    new_smoke_particle,
     new_smoke_emitter
 ]
 
