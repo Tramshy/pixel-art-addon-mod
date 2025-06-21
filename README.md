@@ -21,6 +21,8 @@ A stylized, anime-like shine effect has been added. Two new buttons allow you to
 * Adjust the `Fac` value on the final `Add` node to control the opacity of the shine. A higher `Fac` value makes the shine more opaque.
 * Use the `Shine Reflection` node to tweak the shine’s color, rotation, scale, and screen position. These values often require tuning per object. To fine-tune further, try disconnecting the `Shine Scale` and/or `Shine Rotation` inputs.
 
+A stylized smoke, anime-like particle system has been added. Three new buttons allow you to add the particle system, or add its separate peices (emitter and particle object).
+
 ### Advanced Use
 #### Reflections
 To get reflections to work with this add-on, you will need to use `Light Probe Planes`. Based on testing in Blender 4.1, no other method produces accurate reflections with pixel materials.
