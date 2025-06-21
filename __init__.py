@@ -32,7 +32,7 @@ bl_info = {
 import bpy
 from bpy.utils import register_class, unregister_class
 from . import pixel_art_addon
-from .append_shine_node_group import append_from_asset
+from .append_assets import append_shine_from_asset
 
 ########## Set Render Settings ##########
 def render_settings(context):
@@ -123,6 +123,26 @@ class PIXEL_ART_OT_lights_setup(bpy.types.Operator):
         pixel_art_addon.lights_setup(context)
         return {'FINISHED'}
 
+class new_smoke_particle_system(bpy.types.Operator):
+    """Creates a new emitter with a new particle object that can be manipulated"""
+    bl_idname = "render.smoke_particle_dupli"
+    bl_label = "Create Particle System"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        pixel_art_addon.create_smoke()
+        return {'FINISHED'}
+
+class new_smoke_emitter(bpy.types.Operator):
+    """Creates a new emitter, but not a new smoke particle. You will have to manually set the smoke particle to the emitter. This is useful if you only want to use one particle object instance"""
+    bl_idname = "render.smoke_particle"
+    bl_label = "Create Emitter"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        pixel_art_addon.create_emitter()
+        return {'FINISHED'}
+
 class PIXEL_RENDER_PT_pixel_render_panel(bpy.types.Panel):
     """Creates a Panel for Pixel Rendering in the UI Panels"""
     bl_label = "Pixel Render"
@@ -173,7 +193,21 @@ class PIXEL_RENDER_PT_pixel_render_panel(bpy.types.Panel):
         row.operator("render.multiple_material_shine")
         row = box.row()
         row.scale_y = 1
-        row.operator("render.lights_setup")   
+        row.operator("render.lights_setup")
+
+        box = layout.box()
+        row = box.row()
+        row.alignment = 'CENTER'          
+        row.label(text="Smoke Particle System", icon = "PARTICLE_POINT")
+        row = box.row()
+        row = box.row()
+        row.scale_y = 1.5
+        row.operator("render.smoke_particle_dupli")
+        row = box.row()
+        row.scale_y = 1.5
+        row.operator("render.smoke_particle")
+        row = box.row()
+        row = layout.row()
 
 classes = [
     PIXEL_ART_OT_render_settings,
@@ -182,7 +216,9 @@ classes = [
     PIXEL_ART_OT_multiple_material,
     PIXEL_ART_OT_multiple_material_shine,
     PIXEL_ART_OT_lights_setup,
-    PIXEL_RENDER_PT_pixel_render_panel
+    PIXEL_RENDER_PT_pixel_render_panel,
+    new_smoke_particle_system,
+    new_smoke_emitter
 ]
 
 def register():
@@ -190,7 +226,7 @@ def register():
         register_class(cls)
 
     # Wait to let main Blender thread load node_groups in bpy.data.
-    bpy.app.timers.register(append_from_asset)
+    bpy.app.timers.register(append_shine_from_asset)
 
 def unregister():
     for cls in classes:

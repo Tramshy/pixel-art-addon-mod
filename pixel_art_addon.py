@@ -22,7 +22,7 @@ Created by Lucas Roedel Ribeiro
 import bpy
 
 ########## Creates Simple Default Material ##########
-def single_material(context):
+def single_material(context, defaultName = "PixelArt_Simple"):
     # Generate Bayer Matrix 2x2
     bayerMatrix = bpy.data.images.get("Bayer Matrix")
 
@@ -46,9 +46,9 @@ def single_material(context):
 
     # Creates a material with the name if it doesn' exist already
     for material in bpy.data.materials:
-        if material.name == "PixelArt_Simple":
-            bpy.data.materials.remove(material)       
-    material = bpy.data.materials.new(name = "PixelArt_Simple")
+        if material.name == defaultName:
+            bpy.data.materials.remove(material)
+    material = bpy.data.materials.new(name = defaultName)
     material.use_nodes = True
     material.use_fake_user = True
 
@@ -150,6 +150,8 @@ def single_material(context):
     var2.targets[0].id = bpy.data.scenes["Scene"]
     var2.targets[0].data_path = "render.resolution_y"
     resolutionYdriver.driver.expression = "resolutionY / 2"
+
+    return material
 
 def single_material_shine(self, context):
     single_material(context)
@@ -541,3 +543,69 @@ def lights_setup(context):
 
     # Removes world light
     bpy.data.worlds["World"].node_tree.nodes["Background"].inputs[1].default_value = 0
+
+def create_emitter():
+    verts = [(-2, -2, 0), (-2, 2, 0), (2, 2, 0), (2, -2, 0)]
+    faces = [(0, 1, 2, 3)]
+    
+    mesh = bpy.data.meshes.new("Emitter (Won't render)")
+    emitter = bpy.data.objects.new("Emitter (Won't render)", mesh)
+    bpy.context.collection.objects.link(emitter)
+
+    mesh.from_pydata(verts,[],faces)
+
+    emitter.modifiers.new("ParticleSystem", type='PARTICLE_SYSTEM')
+    ps = emitter.particle_systems[0]
+    pss = ps.settings
+
+    pss.lifetime = 60
+    pss.lifetime_random = 0.5
+    pss.object_align_factor = (0, 0, 10)
+    pss.effector_weights.gravity = 0
+    pss.render_type = 'OBJECT'
+    pss.particle_size = 1
+    pss.use_scale_instance = True
+    pss.size_random = 1
+
+    emitter.show_instancer_for_render = False
+
+    return pss
+
+def create_smoke():
+    emitter = create_emitter()
+
+    mat = None
+
+    for material in bpy.data.materials:
+        if material.name == "PixelSmoke_material":
+            mat = material
+
+    if mat is None:
+        mat = single_material(bpy.context, "PixelSmoke_material")
+
+    color_ramp_node = mat.node_tree.nodes.get("Color Ramp")
+    mix_node = mat.node_tree.nodes.get("Mix (Legacy)")
+
+    # Set dither fac
+    mix_node.inputs[0].default_value = 1
+
+    # Remove last two elements
+    color_ramp_node.color_ramp.elements.remove(color_ramp_node.color_ramp.elements[4])
+    color_ramp_node.color_ramp.elements.remove(color_ramp_node.color_ramp.elements[3])
+    
+    # Set new colors
+    color_ramp_node.color_ramp.elements[0].color = [0.14, 0.15, 0.175, 1.000000]
+    color_ramp_node.color_ramp.elements[1].color = [0.266, 0.301, 0.283, 1.000000]
+    color_ramp_node.color_ramp.elements[2].color = [0.6, 0.52, 0.52, 1.000000]
+
+    # Set correct positions
+    color_ramp_node.color_ramp.elements[1].position = 0.255
+    color_ramp_node.color_ramp.elements[2].position = 0.795
+
+    # Set material to the particle
+    particle = bpy.ops.object.metaball_add(type='BALL')
+    particle = bpy.context.active_object
+    bpy.ops.object.material_slot_add()
+    particle.material_slots[0].material = mat
+
+    emitter.instance_object = particle
