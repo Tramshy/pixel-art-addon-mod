@@ -569,6 +569,28 @@ def create_emitter():
 
     emitter.show_instancer_for_render = False
 
+    size_texture = bpy.data.textures.new("Smoke Size Texture", type='BLEND')
+    size_texture.progression = 'QUADRATIC'
+    size_texture.use_color_ramp = True
+    size_texture.color_ramp.interpolation = 'EASE'
+
+    # Set up color ramp values
+    ramp = size_texture.color_ramp
+    ramp.elements.new(0.03)
+    ramp.elements.new(0.565)
+    ramp.elements[0].color = [1, 1, 1, 1]
+    ramp.elements[1].color = [0, 0, 0, 1]
+    ramp.elements[2].color = [0, 0, 0, 1]
+    ramp.elements[3].color = [1, 1, 1, 1]
+
+    texture_slot = pss.texture_slots.add()
+    texture_slot.texture = size_texture
+    texture_slot.use_map_time = False
+    texture_slot.use_map_size = True
+    texture_slot.size_factor = -1.0
+    texture_slot.texture_coords = 'STRAND'
+    texture_slot.blend_type = 'MULTIPLY'
+
     return pss
 
 def create_particle():
@@ -581,24 +603,24 @@ def create_particle():
     if mat is None:
         mat = single_material(bpy.context, "PixelSmoke_material")
 
-    color_ramp_node = mat.node_tree.nodes.get("Color Ramp")
-    mix_node = mat.node_tree.nodes.get("Mix (Legacy)")
+        color_ramp_node = mat.node_tree.nodes.get("Color Ramp")
+        mix_node = mat.node_tree.nodes.get("Mix (Legacy)")
 
-    # Set dither fac
-    mix_node.inputs[0].default_value = 1
+        # Set dither fac
+        mix_node.inputs[0].default_value = 1
 
-    # Remove last two elements
-    color_ramp_node.color_ramp.elements.remove(color_ramp_node.color_ramp.elements[4])
-    color_ramp_node.color_ramp.elements.remove(color_ramp_node.color_ramp.elements[3])
-    
-    # Set new colors
-    color_ramp_node.color_ramp.elements[0].color = [0.14, 0.15, 0.175, 1.000000]
-    color_ramp_node.color_ramp.elements[1].color = [0.266, 0.301, 0.283, 1.000000]
-    color_ramp_node.color_ramp.elements[2].color = [0.6, 0.52, 0.52, 1.000000]
+        # Remove last two elements
+        for i in range(2):
+            color_ramp_node.color_ramp.elements.remove(color_ramp_node.color_ramp.elements[len(color_ramp_node.color_ramp.elements) - 1])
+        
+        # Set new colors
+        color_ramp_node.color_ramp.elements[0].color = [0.14, 0.15, 0.175, 1.000000]
+        color_ramp_node.color_ramp.elements[1].color = [0.266, 0.301, 0.283, 1.000000]
+        color_ramp_node.color_ramp.elements[2].color = [0.6, 0.52, 0.52, 1.000000]
 
-    # Set correct positions
-    color_ramp_node.color_ramp.elements[1].position = 0.255
-    color_ramp_node.color_ramp.elements[2].position = 0.795
+        # Set correct positions
+        color_ramp_node.color_ramp.elements[1].position = 0.255
+        color_ramp_node.color_ramp.elements[2].position = 0.795
 
     # Set material to the particle
     particle = bpy.ops.object.metaball_add(type='BALL')
