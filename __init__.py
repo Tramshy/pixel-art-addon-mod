@@ -43,6 +43,11 @@ def render_settings(context):
     except:
         scene.render.engine = 'BLENDER_EEVEE'
 
+    try:
+        scene.display_settings.display_device = 'RGBA'
+    except:
+        scene.display_settings.display_device = 'sRGB'
+
     scene.eevee.taa_render_samples = 1
     scene.eevee.taa_samples = 1
     scene.eevee.use_taa_reprojection = False
@@ -50,7 +55,6 @@ def render_settings(context):
     scene.render.filter_size = 0.00
     scene.render.use_freestyle = False
     scene.render.line_thickness = 0.1
-    scene.display_settings.display_device = 'RGBA'
     scene.view_settings.view_transform = 'Standard'
     scene.render.image_settings.file_format = 'PNG'
     scene.render.image_settings.color_depth = '16'

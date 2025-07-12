@@ -545,6 +545,7 @@ def lights_setup(context):
     bpy.data.worlds["World"].node_tree.nodes["Background"].inputs[1].default_value = 0
 
 def create_emitter():
+    # I did this instead of using the regular plane creation function out of stupidity
     verts = [(-2, -2, 0), (-2, 2, 0), (2, 2, 0), (2, -2, 0)]
     faces = [(0, 1, 2, 3)]
     
@@ -554,10 +555,12 @@ def create_emitter():
 
     mesh.from_pydata(verts,[],faces)
 
+    # Create particle system and cache particle settings
     emitter.modifiers.new("ParticleSystem", type='PARTICLE_SYSTEM')
     ps = emitter.particle_systems[0]
     pss = ps.settings
 
+    # Set up particle system settings
     pss.lifetime = 60
     pss.lifetime_random = 0.5
     pss.object_align_factor = (0, 0, 10)
@@ -569,6 +572,7 @@ def create_emitter():
 
     emitter.show_instancer_for_render = False
 
+    # Create new texture and set up basic settings for gradient
     size_texture = bpy.data.textures.new("Smoke Size Texture", type='BLEND')
     size_texture.progression = 'QUADRATIC'
     size_texture.use_color_ramp = True
@@ -583,12 +587,16 @@ def create_emitter():
     ramp.elements[2].color = [0, 0, 0, 1]
     ramp.elements[3].color = [1, 1, 1, 1]
 
+    # Add texture slot under particle system and set to new texture
     texture_slot = pss.texture_slots.add()
     texture_slot.texture = size_texture
+
+    # Set up particle system texture usage settings
     texture_slot.use_map_time = False
     texture_slot.use_map_size = True
     texture_slot.size_factor = -1.0
     texture_slot.texture_coords = 'STRAND'
+    # This is the default blend type when you create a texture by hand, but not when you create in code????
     texture_slot.blend_type = 'MULTIPLY'
 
     return pss
@@ -622,9 +630,10 @@ def create_particle():
         color_ramp_node.color_ramp.elements[1].position = 0.255
         color_ramp_node.color_ramp.elements[2].position = 0.795
 
-    # Set material to the particle
+    # Create actual particle
     particle = bpy.ops.object.metaball_add(type='BALL')
     particle = bpy.context.active_object
+    # Set material to the particle
     bpy.ops.object.material_slot_add()
     particle.material_slots[0].material = mat
 
