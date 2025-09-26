@@ -49,5 +49,8 @@ Pixel materials do not support translucency. To create effects like glass:
 This is a modified version of Lucas Roedel's original add-on. It includes bug fixes and improvements aimed at making the code more readable and easier to extend.
 You can find the original code [here](https://lucasroedel.gumroad.com/l/pixel_art) — I highly recommend checking it out and leaving him a tip if you find it useful.
 
+### 4.5 Notes
+Whilst the addon does work in version 4.5, rendering with the Eevee engine seems to have changed. Rendering with only 1 sample will result in a terrible final render. One solution is to increase the render sampling count. This does work slightly, but even with high values (over 10k) areas that should be colored solid will have very slight deviations. I have yet to find a fix to this. I recommend installing an older version of Blender (I recommend 4.1) and rendering from there. Rendering with 1 sample in this version will result in a clean pixelated render.
+
 ## License
 This add-on is licensed under the GNU GPLv3 License. For more information read: `LICENSE`.
